@@ -1,0 +1,1815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astro Tech: Interactive High-Resolution Image Platform</title>
+
+     <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Set up Inter font and dark theme -->
+     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden; /* Prevent horizontal scroll from animation */
+        }
+
+        /* --- New Keyframes for Rectangle Movement --- */
+        /* الصاروخ يتحرك الآن في مسار مستطيل (Rectangle) */
+        @keyframes rectangleMove {
+            /* 0% (Top Left) - Corner 1, pointing Right initially for a good start */
+            0% { transform: translate(10vw, 10vh) rotate(90deg); opacity: 1; }
+            /* 25% (Top Right) - Corner 2, rotate to point Down */
+            25% { transform: translate(90vw, 10vh) rotate(180deg); }
+            /* 50% (Bottom Right) - Corner 3, rotate to point Left */
+            50% { transform: translate(90vw, 90vh) rotate(270deg); }
+            /* 75% (Bottom Left) - Corner 4, rotate to point Up */
+            75% { transform: translate(10vw, 90vh) rotate(0deg); }
+            /* 100% (Back to Top Left) - Finish cycle, pointing Right */
+            100% { transform: translate(10vw, 10vh) rotate(90deg); }
+        }
+        /* ------------------------------------------- */
+
+        .rocket {
+            position: absolute;
+            top: 0;
+            left: 0;
+            font-size: 3rem;
+            /* Use the new rectangleMove animation */
+            animation: rectangleMove 30s linear infinite; /* Increased duration for smoother loop */
+            filter: drop-shadow(0 0 10px rgba(129, 230, 217, 0.7)); /* Cyan/Turquoise glow */
+            z-index: 50;
+        }
+        .astro-card {
+            backdrop-filter: blur(10px);
+            background-color: rgba(30, 41, 59, 0.7); /* Slate-800 with transparency */
+        }
+
+        
+
+        /* ----------------------------------------------------- */
+        /* --- 2. الأنماط العامة للعناصر --- */
+        /* ----------------------------------------------------- */
+
+        .main-title {
+            animation: pulseGlow 4s infinite ease-in-out;
+        }
+
+        .rocket {
+            position: absolute;
+            top: 0;
+            left: 0;
+            font-size: 3rem;
+            animation: rectangleMove 30s linear infinite; 
+            filter: drop-shadow(0 0 10px rgba(129, 230, 217, 0.7)); 
+            z-index: 50;
+        }
+
+        .satellite {
+            animation: rectangleMove 40s linear infinite, subtleTwinkle 3s infinite alternate;
+            animation-delay: 15s;
+            font-size: 2rem;
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+        }
+
+        .astro-card {
+            backdrop-filter: blur(10px);
+            background-color: rgba(30, 41, 59, 0.7); /* Slate-800 with transparency */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transform-style: preserve-3d;
+        }
+        .astro-card:hover {
+            transform: rotateY(3deg) scale(1.02);
+            box-shadow: 0 10px 30px rgba(60, 150, 255, 0.4);
+        }
+
+
+        /* ----------------------------------------------------- */
+        /* --- 3. تصميم المساعد الذكي والروبوت (Robot Bot & AI Assistant) --- */
+        /* ----------------------------------------------------- */
+
+        /* حاوية المساعد الذكي - في الزاوية السفلية اليمنى */
+        .ai-assistant {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 90;
+        }
+
+        /* زر فتح المساعد */
+        .assistant-btn {
+            background-color: #3b82f6; /* Blue-500 */
+            color: white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s;
+        }
+        .assistant-btn:hover {
+            background-color: #2563eb; /* Blue-600 */
+        }
+
+        /* نافذة الدردشة */
+        .assistant-window {
+            position: absolute;
+            bottom: 70px; /* فوق الزر */
+            right: 0;
+            width: 300px;
+            height: 400px;
+            background-color: rgba(15, 23, 42, 0.98); /* Slate-900 transparent */
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            opacity: 0; /* يبدأ مخفياً */
+            visibility: hidden;
+            transform: scale(0.95); /* يبدأ أصغر قليلاً */
+            transition: all 0.3s ease-in-out;
+        }
+        .assistant-window.open {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+        .assistant-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+        .message.bot {
+            align-self: flex-start;
+            background-color: #334155; /* Slate-700 */
+        }
+        .assistant-input {
+            padding: 10px;
+            border-top: 1px solid #334155;
+            display: flex;
+        }
+        .assistant-input input {
+            flex-grow: 1;
+            padding: 8px;
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            margin-right: 8px;
+            color: white;
+            outline: none;
+        }
+        .assistant-input button {
+            background-color: #3b82f6;
+            padding: 8px 15px;
+            border-radius: 6px;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+
+        /* الروبوت التفاعلي */
+        .robot-button {
+            position: fixed;
+            bottom: 30px; /* نفس موضع زر المساعد */
+            right: 30px; 
+            cursor: pointer;
+            font-size: 3rem;
+            z-index: 110; /* ليكون فوق زر المساعد */
+            transition: transform 0.3s ease-out, opacity 0.3s ease;
+            animation: bounce 2s infinite; 
+            user-select: none; 
+            /* لتمكين استخدام العناصر الوهمية (pseudo-elements) */
+            line-height: 1; 
+            display: inline-block;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        /* الحركة الجديدة: الطيران فوق النافذة */
+        @keyframes flyAboveChat {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            50% { transform: translateY(-100px) rotate(15deg) scale(1.1); } 
+            100% { transform: translateY(-430px) rotate(0deg) scale(1); opacity: 1; } 
+        }
+
+        /* الرسوم المتحركة الجديدة للهب */
+        @keyframes jetFlame {
+            0% { height: 10px; opacity: 1; background-color: #ff9900; } /* برتقالي */
+            50% { height: 25px; opacity: 0.8; background-color: #ff3300; } /* أحمر */
+            100% { height: 10px; opacity: 1; background-color: #ff9900; }
+        }
+
+        .robot-button.flying {
+            animation: flyAboveChat 0.8s ease-out forwards;
+            pointer-events: none;
+        }
+        
+        /* الروبوت في حالة العودة، عكس الحركة */
+        .robot-button.returning {
+            animation: flyAboveChat 0.5s ease-in reverse forwards; 
+        }
+
+        /* إضافة تأثير اللهب عند الطيران فقط */
+        .robot-button.flying::before {
+            content: '';
+            position: absolute;
+            bottom: -15px; /* يوضع أسفل الروبوت */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 10px;
+            background-color: #ff9900; 
+            border-radius: 50% 50% 10% 10%; /* شكل اللهب */
+            box-shadow: 0 0 10px 5px rgba(255, 153, 0, 0.7); /* توهج */
+            z-index: -1; /* خلف الروبوت */
+            animation: jetFlame 0.15s infinite alternate; /* حركة وميض سريعة */
+        }
+        
+        /* إخفاء النار (::before) عند عدم الطيران */
+        .robot-button:not(.flying)::before {
+            content: none;
+        }
+    </style>
+    <style>
+        :root {
+            --bg: #040714;
+            --card: #07102a;
+            --accent: #6ee7ff;
+            --muted: #9bb0d6;
+            --glass: rgba(255,255,255,0.04);
+            --radius: 14px;
+            --glass-2: rgba(255,255,255,0.02);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: #e6f0ff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Enhanced Space Background */
+        .space-background {
+            position: fixed;
+            inset: 0;
+            z-index: -10;
+        }
+        
+        .stars-layer-1 {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(#ffffff 1px, transparent 1px);
+            background-size: 200px 200px;
+            opacity: 0.15;
+            animation: starDrift 120s linear infinite;
+        }
+        
+        .stars-layer-2 {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(#ffffff 1px, transparent 1px);
+            background-size: 400px 400px;
+            opacity: 0.1;
+            animation: starDrift 80s linear infinite reverse;
+        }
+        
+        .stars-layer-3 {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(#ffffff 1px, transparent 1px);
+            background-size: 600px 600px;
+            opacity: 0.05;
+            animation: starDrift 200s linear infinite;
+        }
+        
+        @keyframes starDrift {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-50px, 50px); }
+        }
+        
+        .nebula-1 {
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(110, 231, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(255, 100, 255, 0.1) 0%, transparent 40%);
+            opacity: 0.3;
+            animation: nebulaPulse 30s ease-in-out infinite alternate;
+        }
+        
+        .nebula-2 {
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 60% 20%, rgba(100, 200, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 30% 80%, rgba(255, 150, 50, 0.08) 0%, transparent 50%);
+            opacity: 0.2;
+            animation: nebulaPulse 40s ease-in-out infinite alternate-reverse;
+        }
+        
+        @keyframes nebulaPulse {
+            0% { opacity: 0.2; transform: scale(1); }
+            100% { opacity: 0.4; transform: scale(1.1); }
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 5;
+            backdrop-filter: blur(5px);
+            background: rgba(4, 7, 20, 0.5);
+            border-radius: 0 0 var(--radius) var(--radius);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #061225, #08304a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+            animation: logoGlow 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes logoGlow {
+            0% { box-shadow: 0 6px 18px rgba(0,0,0,0.6); }
+            100% { box-shadow: 0 6px 18px rgba(110, 231, 255, 0.3); }
+        }
+
+        h1 {
+            font-size: 24px;
+            letter-spacing: 0.6px;
+            text-shadow: 0 0 10px rgba(110, 231, 255, 0.5);
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            background: #0b2540;
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            background: #0d2a4a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn.secondary {
+            background: transparent;
+            border: 1px solid rgba(110,231,255,0.06);
+        }
+
+        .btn.primary {
+            background: linear-gradient(90deg, var(--accent), #3fb0ff);
+            color: #002;
+        }
+
+        /* Main Layout */
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            position: relative;
+            z-index: 5;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: linear-gradient(180deg, var(--glass), var(--glass-2));
+            padding: 20px;
+            border-radius: var(--radius);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 6px 24px rgba(3,6,20,0.6);
+            border: 1px solid rgba(110, 231, 255, 0.05);
+            animation: sidebarFloat 6s ease-in-out infinite;
+            height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+
+        @keyframes sidebarFloat {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            background: #021028;
+            color: var(--accent);
+            outline: 2px solid rgba(110,231,255,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: 2px solid rgba(110,231,255,0.2);
+            box-shadow: 0 0 10px rgba(110,231,255,0.2);
+        }
+
+        .filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .filter-btn {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: none;
+            background: rgba(110,231,255,0.06);
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(110,231,255,0.12);
+            transform: translateY(-2px);
+        }
+
+        .dataset-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .dataset-item {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 12px;
+            border-radius: 10px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.02);
+            transition: all 0.3s ease;
+        }
+
+        .dataset-item:hover {
+            transform: translateY(-3px);
+            border: 1px solid rgba(110, 231, 255, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .dataset-item.active {
+            border: 1px solid rgba(110, 231, 255, 0.2);
+            background: rgba(110, 231, 255, 0.05);
+        }
+
+        .dataset-thumb {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .dataset-info {
+            flex: 1;
+        }
+
+        .dataset-info h3 {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .dataset-info p {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+
+        .dataset-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .tag {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(110, 231, 255, 0.1);
+            color: var(--accent);
+        }
+
+        /* Main Viewer */
+        .viewer-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: calc(100vh - 120px);
+        }
+
+        .viewer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: linear-gradient(180deg, var(--glass), var(--glass-2));
+            border-radius: var(--radius);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 6px 24px rgba(3,6,20,0.6);
+            border: 1px solid rgba(110, 231, 255, 0.05);
+        }
+
+        .viewer-title h2 {
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .viewer-title p {
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .viewer-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            background: rgba(11, 37, 64, 0.5);
+            padding: 6px;
+            border-radius: 8px;
+        }
+
+        .zoom-display {
+            font-size: 14px;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .viewer-content {
+            flex: 1;
+            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            border-radius: var(--radius);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 6px 24px rgba(3,6,20,0.6);
+            border: 1px solid rgba(110, 231, 255, 0.05);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .image-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg,#02061a, #071029);
+        }
+
+        .tile-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform-origin: 0 0;
+            transition: transform 0.1s;
+        }
+
+        .tile {
+            position: absolute;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .overlay-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .marker {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%,#fff7, #ffb86b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #082;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: 0 6px 14px #0006;
+            animation: pulse 2s ease-in-out infinite;
+            z-index: 10;
+            pointer-events: auto;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 6px 14px #0006; }
+            50% { transform: scale(1.15); box-shadow: 0 10px 28px #0008, 0 0 15px rgba(255, 184, 107, 0.5); }
+            100% { transform: scale(1); box-shadow: 0 6px 14px #0006; }
+        }
+        
+        .marker .tip {
+            position: absolute;
+            left: 24px;
+            top: -6px;
+            background: rgba(255,255,255,0.02);
+            padding: 6px;
+            border-radius: 8px;
+            min-width: 120px;
+            color: var(--accent);
+            font-size: 13px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(110, 231, 255, 0.1);
+            pointer-events: none;
+        }
+
+        .empty-state {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .viewer-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: linear-gradient(180deg, var(--glass), var(--glass-2));
+            border-radius: var(--radius);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 6px 24px rgba(3,6,20,0.6);
+            border: 1px solid rgba(110, 231, 255, 0.05);
+        }
+
+        .coordinate-display {
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .footer-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* AI Assistant */
+        .ai-assistant {
+            position: fixed;
+            right: 22px;
+            bottom: 22px;
+            z-index: 60;
+        }
+
+        .assistant-btn {
+            background: linear-gradient(180deg,#6ee7ff,#3fb0ff);
+            color: #001;
+            padding: 12px;
+            border-radius: 999px;
+            border: none;
+            box-shadow: 0 12px 30px rgba(63,176,255,0.18);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: botFloat 3s ease-in-out infinite;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        @keyframes botFloat {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .assistant-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(63,176,255,0.3);
+        }
+
+        .assistant-window {
+            position: absolute;
+            right: 0;
+            bottom: 70px;
+            width: 360px;
+            background: #02102a;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            max-height: 60vh;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(110, 231, 255, 0.1);
+            animation: botAppear 0.3s ease-out;
+            display: none;
+        }
+        
+        @keyframes botAppear {
+            0% { opacity: 0; transform: translateY(20px) scale(0.9); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .assistant-messages {
+            flex: 1;
+            overflow: auto;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .message {
+            padding: 8px;
+            border-radius: 8px;
+            max-width: 78%;
+            word-wrap: break-word;
+            animation: messageAppear 0.3s ease-out;
+        }
+        
+        @keyframes messageAppear {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.user {
+            margin-left: auto;
+            background: linear-gradient(90deg,#6ee7ff,#3fb0ff);
+            color: #001;
+        }
+        
+        .message.bot {
+            background: rgba(255,255,255,0.03);
+            color: var(--accent);
+            border: 1px solid rgba(110, 231, 255, 0.05);
+        }
+
+        .assistant-input {
+            display: flex;
+            gap: 8px;
+        }
+
+        .assistant-input input {
+            flex: 1;
+            padding: 8px;
+            border-radius: 8px;
+            border: none;
+            background: #011227;
+            color: var(--accent);
+            transition: all 0.3s ease;
+        }
+
+        .assistant-input input:focus {
+            outline: 1px solid rgba(110,231,255,0.2);
+            box-shadow: 0 0 8px rgba(110,231,255,0.2);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                height: auto;
+                max-height: 40vh;
+            }
+            
+            .viewer-container {
+                height: 60vh;
+            }
+        }
+
+        /* Loading */
+        .loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.5);
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            z-index: 30;
+            backdrop-filter: blur(5px);
+        }
+        
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.15);
+            border-top-color: var(--accent);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        /* Scrollbar Customization for Sidebar */
+        .sidebar::-webkit-scrollbar {
+        width: 8px;
+        }
+
+        /* ========================================
+   Cosmic Scrollbar with Shooting Tail
+   ======================================== */
+        .sidebar::-webkit-scrollbar {
+        width: 10px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 10px;
+        margin: 4px 0;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #162238, #2c4367, #3fa9f5);
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.05);
+        position: relative;
+        overflow: hidden;
+        animation: glowPulse 4s infinite ease-in-out;
+        box-shadow: inset 0 0 6px rgba(0,0,0,0.4), 
+                    0 0 8px rgba(63,169,245,0.4);
+        }
+
+        /* Tail Effect (pseudo-element) */
+        .sidebar::-webkit-scrollbar-thumb::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: 0;
+        width: 100%;
+        height: 200%;
+        background: linear-gradient(
+            180deg, 
+            rgba(63,169,245,0.7) 0%, 
+            rgba(63,169,245,0.2) 60%, 
+            transparent 100%
+        );
+        filter: blur(6px);
+        animation: tailFlow 3s infinite linear;
+        }
+
+        /* Glow Pulse for body */
+        @keyframes glowPulse {
+        0%   { box-shadow: inset 0 0 6px rgba(0,0,0,0.4), 0 0 6px rgba(63,169,245,0.2); }
+        50%  { box-shadow: inset 0 0 8px rgba(0,0,0,0.6), 0 0 14px rgba(63,169,245,0.8); }
+        100% { box-shadow: inset 0 0 6px rgba(0,0,0,0.4), 0 0 6px rgba(63,169,245,0.3); }
+        }
+
+        /* Tail Animation */
+        @keyframes tailFlow {
+        0%   { transform: translateY(-30%); opacity: 0.7; }
+        50%  { transform: translateY(30%);  opacity: 0.3; }
+        100% { transform: translateY(100%); opacity: 0; }
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, #2c4367, #3fa9f5, #6ee7ff);
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.6), 
+                    0 0 18px rgba(63,169,245,0.9),
+                    0 0 30px rgba(110,231,255,0.6);
+        }
+        /* Scrollbar Styling for dataset-list */
+        .dataset-list::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .dataset-list::-webkit-scrollbar-track {
+            background: rgba(2,16,40,0.4); 
+            border-radius: 8px;
+        }
+
+        .dataset-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(0,212,255,0.8), rgba(0,100,255,0.6));
+            border-radius: 8px;
+            box-shadow: 0 0 8px rgba(0,212,255,0.4);
+            transition: all 0.3s ease;
+            animation: thumbGlow 3s ease-in-out infinite;
+        }
+
+        .dataset-list::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, rgba(0,212,255,1), rgba(0,100,255,0.9));
+            box-shadow: 0 0 12px rgba(0,212,255,0.6);
+        }
+
+        @keyframes thumbGlow {
+            0% { box-shadow: 0 0 6px rgba(0,212,255,0.4), 0 0 12px rgba(0,100,255,0.3);}
+            50% { box-shadow: 0 0 12px rgba(0,212,255,0.6), 0 0 20px rgba(0,100,255,0.5);}
+            100% { box-shadow: 0 0 6px rgba(0,212,255,0.4), 0 0 12px rgba(0,100,255,0.3);}
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 1. Starfield Canvas Background -->
+    <canvas id="starfield" class="fixed inset-0 w-full h-full -z-10"></canvas>
+
+    <!-- 2. Animated Rocket Element (Using an emoji for a quick, theme-appropriate icon) -->
+    <div class="rocket hidden md:block" style="animation-delay: 5s;">🚀</div>
+    <div class="rocket hidden md:block" style="animation-duration: 15s; animation-delay: 1s; font-size: 2rem;">🛰️</div>
+
+    <!-- Enhanced Space Background -->
+    <div class="space-background">
+        <div class="stars-layer-1"></div>
+        <div class="stars-layer-2"></div>
+        <div class="stars-layer-3"></div>
+        <div class="nebula-1"></div>
+        <div class="nebula-2"></div>
+    </div>
+
+    <header>
+        <div class="logo">
+            <div class="logo-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
+                    <circle cx="12" cy="12" r="10" fill="#082438"/>
+                    <path d="M4 12c2-1 5-3 8-3s6 2 8 3" stroke="#6ee7ff" stroke-width="0.9" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div>
+                <h1>Astro Tech</h1>
+                <p class="small">Interactive High-Resolution Image Platform</p>
+            </div>
+        </div>
+        <div class="header-controls">
+            <button class="btn secondary" id="exportBtn">Export Data</button>
+            <button class="btn secondary" id="settingsBtn">Settings</button>
+            <button class="btn primary" id="newLabelBtn">Add Label</button>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search datasets, locations, features...">
+                    <button class="btn primary" id="searchBtn">Search</button>
+                </div>
+                <div class="filter-options">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="earth">Earth</button>
+                    <button class="filter-btn" data-filter="mars">Mars</button>
+                    <button class="filter-btn" data-filter="moon">Moon</button>
+                    <button class="filter-btn" data-filter="space">Space</button>
+                    <button class="filter-btn" data-filter="timelapse">Timelapse</button>
+                </div>
+            </div>
+
+
+            <div class="dataset-list" id="datasetList">
+              
+                <!-- Datasets will be populated by JavaScript -->
+            </div>
+        </aside>
+
+        <main class="viewer-container">
+            <div class="viewer-header">
+                <div class="viewer-title">
+                    <h2 id="datasetTitle">Select a dataset to explore</h2>
+                    <p id="datasetDescription">Choose from the available NASA datasets on the left</p>
+                </div>
+                <div class="viewer-controls">
+                    <div class="control-group">
+                        <button class="btn" id="zoomOutBtn">−</button>
+                        <div class="zoom-display" id="zoomLevel">100%</div>
+                        <button class="btn" id="zoomInBtn">＋</button>
+                    </div>
+                    <button class="btn secondary" id="resetViewBtn">Reset View</button>
+                    <button class="btn secondary" id="compareBtn">Compare</button>
+                </div>
+            </div>
+            <div class="viewer-content">
+                <div class="image-container" id="imageContainer">
+                    <div class="tile-layer" id="tileLayer"></div>
+                    <div class="overlay-layer" id="overlayLayer"></div>
+                    <div class="empty-state" id="emptyState">
+                        <h3>No dataset selected</h3>
+                        <p>Choose a dataset from the sidebar to begin exploration</p>
+                    </div>
+                    <div class="loader" id="loader" style="display: none;">
+                        <div class="spinner"></div>
+                        <div>Loading high-resolution data...</div>
+                    </div>
+                </div>
+            </div>
+            <div class="viewer-footer">
+                <div class="coordinate-display" id="coordinateDisplay">
+                    Coordinates: N/A
+                </div>
+                <div class="footer-controls">
+                    <button class="btn secondary" id="labelsToggle">Show Labels</button>
+                    <button class="btn secondary" id="exportViewBtn">Export View</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- AI Assistant -->
+    <div class="ai-assistant">
+        <button class="assistant-btn" id="assistantToggle">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm4 0h-2V9h2v8z" fill="currentColor"/>
+            </svg>
+        </button>
+        <div class="assistant-window" id="assistantWindow">
+            <div class="assistant-messages" id="assistantMessages">
+                <div class="message bot">
+                    Hello! I'm your NASA exploration assistant. How can I help you today?
+                </div>
+            </div>
+            <div class="assistant-input">
+                <input type="text" id="assistantInput" placeholder="Ask about datasets, features, or exploration tips...">
+                <button class="btn primary" id="sendMessageBtn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        
+        // NASA datasets with metadata
+        const datasets = [
+            {
+                id: 'heic0506a.jpeg',
+                title: 'Hubble: Andromeda Galaxy',
+                description: '2.5-gigapixel image of the Andromeda Galaxy - the largest Hubble image ever taken',
+                source: 'Hubble Space Telescope',
+                resolution: '2.5 Gigapixels',
+                tags: ['space', 'galaxy', 'hubble'],
+                category: 'space',
+                thumb: 'heic0506a.jpeg',
+                imageUrl: 'heic0506a.jpeg', // Example URL pattern
+                center: [0.5, 0.5],
+                maxZoom: 8
+            },
+
+        ];
+
+function loadDataset(dataset) {
+    const tileLayer = document.getElementById('tileLayer');
+    const emptyState = document.getElementById('emptyState');
+    const loader = document.getElementById('loader');
+
+    // امسح القديم
+    tileLayer.innerHTML = '';
+    emptyState.style.display = 'none';
+
+    // شغل اللودر لو عايز
+    loader.style.display = 'block';
+
+    if (dataset.imageUrl) {
+        const img = document.createElement('img');
+        img.src = dataset.imageUrl;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'contain';
+
+        // لما الصورة تخلص تحميل
+        img.onload = () => {
+            loader.style.display = 'none';
+        };
+
+        tileLayer.appendChild(img);
+    } else if (dataset.tileUrl) {
+        // لو dataset من نوع tiles (الكواكب القديمة)
+        renderTiles();
+        loader.style.display = 'none';
+    }
+}
+
+
+        // Application state
+        let currentDataset = null;
+        let currentZoom = 1;
+        let currentPosition = { x: 0, y: 0 };
+        let labelsVisible = true;
+        let markers = [];
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+
+        // DOM elements
+        const datasetList = document.getElementById('datasetList');
+        const datasetTitle = document.getElementById('datasetTitle');
+        const datasetDescription = document.getElementById('datasetDescription');
+        const imageContainer = document.getElementById('imageContainer');
+        const tileLayer = document.getElementById('tileLayer');
+        const overlayLayer = document.getElementById('overlayLayer');
+        const emptyState = document.getElementById('emptyState');
+        const loader = document.getElementById('loader');
+        const zoomLevel = document.getElementById('zoomLevel');
+        const coordinateDisplay = document.getElementById('coordinateDisplay');
+        const searchInput = document.getElementById('searchInput');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const assistantToggle = document.getElementById('assistantToggle');
+        const assistantWindow = document.getElementById('assistantWindow');
+        const assistantMessages = document.getElementById('assistantMessages');
+        const assistantInput = document.getElementById('assistantInput');
+        const sendMessageBtn = document.getElementById('sendMessageBtn');
+
+        // Initialize the application
+        function init() {
+            renderDatasetList();
+            setupEventListeners();
+            setupViewerControls();
+            setupAssistant();
+        }
+
+        // Render the dataset list in the sidebar
+        function renderDatasetList(filter = 'all') {
+            datasetList.innerHTML = '';
+            
+            const filteredDatasets = filter === 'all' 
+                ? datasets 
+                : datasets.filter(dataset => dataset.category === filter);
+            
+            if (filteredDatasets.length === 0) {
+                datasetList.innerHTML = '<div class="empty-state">No datasets match your filter</div>';
+                return;
+            }
+            
+            filteredDatasets.forEach(dataset => {
+                const datasetElement = document.createElement('div');
+                datasetElement.className = 'dataset-item ' + (currentDataset && currentDataset.id === dataset.id ? 'active' : '');
+                datasetElement.innerHTML = 
+                    '<img src="' + dataset.thumb + '" alt="' + dataset.title + '" class="dataset-thumb">' +
+                    '<div class="dataset-info">' +
+                    '<h3>' + dataset.title + '</h3>' +
+                    '<p>' + dataset.description + '</p>' +
+                    '<div class="dataset-tags">' +
+                    dataset.tags.map(tag => '<span class="tag">' + tag + '</span>').join('') +
+                    '</div>' +
+                    '</div>';
+                datasetElement.addEventListener('click', () => loadDataset(dataset));
+                datasetList.appendChild(datasetElement);
+            });
+        }
+
+        // Load a dataset into the viewer
+        function loadDataset(dataset) {
+            currentDataset = dataset;
+            datasetTitle.textContent = dataset.title;
+            datasetDescription.textContent = dataset.description;
+            emptyState.style.display = 'none';
+            loader.style.display = 'flex';
+            
+            // Update active state in sidebar
+            document.querySelectorAll('.dataset-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // Reset view
+            currentZoom = 1;
+            currentPosition = { x: 0, y: 0 };
+            updateViewerTransform();
+            
+setTimeout(() => {
+    loader.style.display = 'none';
+    // renderTiles();  // اتلغت
+    // loadMarkers();  // دي كمان مسؤولة عن النقاط (Galaxy Core .. إلخ) لو مش عايزها
+}, 1500);
+
+        }
+
+
+            {
+            // In a real implementation, this would calculate which tiles to load
+            // based on the current zoom level and position
+            const tileSize = 256;
+            const cols = Math.ceil(imageContainer.clientWidth / tileSize);
+            const rows = Math.ceil(imageContainer.clientHeight / tileSize);
+            
+            for (let x = 0; x < cols; x++) {
+                for (let y = 0; y < rows; y++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'tile';
+                    tile.style.width = tileSize + 'px';
+                    tile.style.height = tileSize + 'px';
+                    tile.style.left = (x * tileSize) + 'px';
+                    tile.style.top = (y * tileSize) + 'px';
+                    tile.style.background = 'rgba(' + (50 + x * 20) + ', ' + (50 + y * 20) + ', 100, 0.1)';
+                    tileLayer.appendChild(tile);
+                }
+            }
+        }
+
+        // Load markers for the current dataset
+        function loadMarkers() {
+            overlayLayer.innerHTML = '';
+            markers = [];
+            
+            // In a real app, this would load from a database or localStorage
+            const sampleMarkers = [
+                { id: 1, x: 0.3, y: 0.4, text: 'Galaxy Core', type: 'feature' },
+                { id: 2, x: 0.7, y: 0.6, text: 'Star Cluster', type: 'feature' },
+                { id: 3, x: 0.5, y: 0.2, text: 'Dust Cloud', type: 'feature' }
+            ];
+            
+            sampleMarkers.forEach(marker => {
+                addMarker(marker);
+            });
+        }
+
+        // Add a marker to the overlay
+        function addMarker(marker) {
+            markers.push(marker);
+            
+            if (!labelsVisible) return;
+            
+            const markerElement = document.createElement('div');
+            markerElement.className = 'marker';
+            markerElement.style.left = (marker.x * 100) + '%';
+            markerElement.style.top = (marker.y * 100) + '%';
+            
+            const tip = document.createElement('div');
+            tip.className = 'tip';
+            tip.textContent = marker.text;
+            markerElement.appendChild(tip);
+            
+            markerElement.addEventListener('click', (e) => {
+                e.stopPropagation();
+                onMarkerClick(marker);
+            });
+            
+            overlayLayer.appendChild(markerElement);
+        }
+
+        // Handle marker click
+        function onMarkerClick(marker) {
+            // In a real app, this might show a detailed info panel
+            alert('Marker: ' + marker.text + '\n\nThis is a sample implementation. In a full application, this would show detailed information about the feature.');
+        }
+
+        // Update the viewer transform based on current zoom and position
+        function updateViewerTransform() {
+            tileLayer.style.transform = 'translate(' + currentPosition.x + 'px, ' + currentPosition.y + 'px) scale(' + currentZoom + ')';
+            zoomLevel.textContent = Math.round(currentZoom * 100) + '%';
+        }
+
+        // Set up event listeners for the viewer
+        function setupViewerControls() {
+            // Zoom controls
+            document.getElementById('zoomInBtn').addEventListener('click', () => {
+                currentZoom = Math.min(currentZoom * 1.2, 5);
+                updateViewerTransform();
+            });
+            
+            document.getElementById('zoomOutBtn').addEventListener('click', () => {
+                currentZoom = Math.max(currentZoom / 1.2, 0.1);
+                updateViewerTransform();
+            });
+            
+            document.getElementById('resetViewBtn').addEventListener('click', () => {
+                currentZoom = 1;
+                currentPosition = { x: 0, y: 0 };
+                updateViewerTransform();
+            });
+            
+            // Panning
+            imageContainer.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                dragStart = { x: e.clientX - currentPosition.x, y: e.clientY - currentPosition.y };
+                imageContainer.style.cursor = 'grabbing';
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                currentPosition.x = e.clientX - dragStart.x;
+                currentPosition.y = e.clientY - dragStart.y;
+                updateViewerTransform();
+            });
+            
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                imageContainer.style.cursor = 'default';
+            });
+            
+            // Wheel zoom
+            imageContainer.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const delta = -Math.sign(e.deltaY);
+                currentZoom = Math.max(0.1, Math.min(5, currentZoom * (1 + delta * 0.1)));
+                updateViewerTransform();
+            });
+            
+            // Labels toggle
+            document.getElementById('labelsToggle').addEventListener('click', () => {
+                labelsVisible = !labelsVisible;
+                overlayLayer.style.display = labelsVisible ? 'block' : 'none';
+                document.getElementById('labelsToggle').textContent = 
+                    labelsVisible ? 'Hide Labels' : 'Show Labels';
+            });
+            
+            // Coordinate display
+            imageContainer.addEventListener('mousemove', (e) => {
+                if (!currentDataset) return;
+                
+                const rect = imageContainer.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width;
+                const y = (e.clientY - rect.top) / rect.height;
+                
+                coordinateDisplay.textContent = 'Coordinates: ' + x.toFixed(3) + ', ' + y.toFixed(3);
+            });
+        }
+
+        // Set up event listeners for the application
+        function setupEventListeners() {
+            // Search functionality
+            searchInput.addEventListener('input', () => {
+                const query = searchInput.value.toLowerCase();
+                if (query.length < 2) {
+                    renderDatasetList();
+                    return;
+                }
+                
+                const filtered = datasets.filter(dataset => 
+                    dataset.title.toLowerCase().includes(query) ||
+                    dataset.description.toLowerCase().includes(query) ||
+                    dataset.tags.some(tag => tag.toLowerCase().includes(query))
+                );
+                
+                renderFilteredDatasets(filtered);
+            });
+            
+            // Filter buttons
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    renderDatasetList(button.dataset.filter);
+                });
+            });
+            
+            // New label button
+            document.getElementById('newLabelBtn').addEventListener('click', () => {
+                if (!currentDataset) {
+                    alert('Please select a dataset first');
+                    return;
+                }
+                
+                const labelText = prompt('Enter label text:');
+                if (labelText) {
+                    // In a real app, this would capture the click position
+                    // For this demo, we'll add it to a random position
+                    const newMarker = {
+                        id: Date.now(),
+                        x: Math.random() * 0.8 + 0.1,
+                        y: Math.random() * 0.8 + 0.1,
+                        text: labelText,
+                        type: 'user'
+                    };
+                    
+                    addMarker(newMarker);
+                    // In a real app, we would save this to a database or localStorage
+                }
+            });
+        }
+
+        // Render filtered datasets
+        function renderFilteredDatasets(filteredDatasets) {
+            datasetList.innerHTML = '';
+            
+            if (filteredDatasets.length === 0) {
+                datasetList.innerHTML = '<div class="empty-state">No datasets match your search</div>';
+                return;
+            }
+            
+            filteredDatasets.forEach(dataset => {
+                const datasetElement = document.createElement('div');
+                datasetElement.className = 'dataset-item ' + (currentDataset && currentDataset.id === dataset.id ? 'active' : '');
+                datasetElement.innerHTML = 
+                    '<img src="' + dataset.thumb + '" alt="' + dataset.title + '" class="dataset-thumb">' +
+                    '<div class="dataset-info">' +
+                    '<h3>' + dataset.title + '</h3>' +
+                    '<p>' + dataset.description + '</p>' +
+                    '<div class="dataset-tags">' +
+                    dataset.tags.map(tag => '<span class="tag">' + tag + '</span>').join('') +
+                    '</div>' +
+                    '</div>';
+                datasetElement.addEventListener('click', () => loadDataset(dataset));
+                datasetList.appendChild(datasetElement);
+            });
+        }
+
+        // Set up the AI assistant
+        function setupAssistant() {
+            assistantToggle.addEventListener('click', () => {
+                const isVisible = assistantWindow.style.display === 'flex';
+                assistantWindow.style.display = isVisible ? 'none' : 'flex';
+            });
+            
+            sendMessageBtn.addEventListener('click', sendMessage);
+            assistantInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+        }
+
+        // Send a message to the assistant
+        function sendMessage() {
+            const message = assistantInput.value.trim();
+            if (!message) return;
+            
+            // Add user message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.textContent = message;
+            assistantMessages.appendChild(userMessage);
+            
+            // Clear input
+            assistantInput.value = '';
+            
+            // Scroll to bottom
+            assistantMessages.scrollTop = assistantMessages.scrollHeight;
+            
+            // Simulate bot response
+            setTimeout(() => {
+                const botResponse = document.createElement('div');
+                botResponse.className = 'message bot';
+                botResponse.textContent = generateBotResponse(message);
+                assistantMessages.appendChild(botResponse);
+                assistantMessages.scrollTop = assistantMessages.scrollHeight;
+            }, 1000);
+        }
+
+        // Generate a response from the assistant
+        function generateBotResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('help') || lowerMessage.includes('what can you do')) {
+                return "I can help you explore NASA datasets! Ask me about specific features, how to use the platform, or information about the data sources.";
+            }
+            
+            if (lowerMessage.includes('mars') || lowerMessage.includes('mro')) {
+                return "The Mars datasets come from the Mars Reconnaissance Orbiter, which provides daily global coverage. You can zoom in to see surface features like craters, dunes, and polar ice caps.";
+            }
+            
+            if (lowerMessage.includes('moon') || lowerMessage.includes('lunar')) {
+                return "Lunar data is from the Lunar Reconnaissance Orbiter Camera (LROC). The polar maps are particularly interesting for potential water ice deposits in permanently shadowed regions.";
+            }
+            
+            if (lowerMessage.includes('andromeda') || lowerMessage.includes('galaxy')) {
+                return "The Andromeda Galaxy image is the largest Hubble has ever taken, with 2.5 gigapixels. You can zoom in to see individual stars and star clusters throughout the galaxy.";
+            }
+            
+            if (lowerMessage.includes('label') || lowerMessage.includes('marker')) {
+                return "To add a label, click the 'Add Label' button and then click on the image where you want to place it. You can add descriptions of features you discover!";
+            }
+            
+            if (lowerMessage.includes('zoom') || lowerMessage.includes('navigate')) {
+                return "Use your mouse wheel to zoom, click and drag to pan, or use the zoom buttons in the viewer controls. The platform uses a tiling system to efficiently load high-resolution data.";
+            }
+            
+            return "I'm not sure how to help with that. Try asking about specific datasets, features, or how to use the exploration tools.";
+        }
+
+        // Initialize the application when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+    <script>
+        // JavaScript for the Starfield Animation
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        const numStars = 150;
+        let animationFrameId;
+
+        function setCanvasSize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function createStars() {
+            for (let i = 0; i < numStars; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 1.5 + 0.5, // 0.5 to 2.0
+                    velocity: Math.random() * 0.05 + 0.05, // 0.05 to 0.1
+                    alpha: Math.random() // for twinkling effect
+                });
+            }
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < numStars; i++) {
+                const star = stars[i];
+
+                // Update position (subtle downward drift for slow 'travel')
+                star.y += star.velocity;
+
+                // Loop stars from bottom to top
+                if (star.y > canvas.height) {
+                    star.y = 0;
+                    star.x = Math.random() * canvas.width;
+                }
+
+                // Update alpha for twinkling
+                star.alpha += star.velocity * 5;
+                if (star.alpha > Math.PI * 2) {
+                    star.alpha = 0;
+                }
+                const twinkle = Math.abs(Math.cos(star.alpha));
+
+                // Draw star
+                ctx.fillStyle = `rgba(255, 255, 255, ${twinkle})`;
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2, false);
+                ctx.fill();
+            }
+        }
+
+        function animate() {
+            drawStars();
+            animationFrameId = requestAnimationFrame(animate);
+        }
+
+        // Initialize and handle resize
+        setCanvasSize();
+        createStars();
+        animate();
+
+        window.addEventListener('resize', () => {
+            // Stop current animation to avoid glitches during resize
+            cancelAnimationFrame(animationFrameId);
+            setCanvasSize();
+            // Re-initialize stars for new dimensions (optional, keeps them spread out)
+            stars = [];
+            createStars();
+            // Restart animation
+            animate();
+        });
+    </script>
+
+ <!-- 4. Interactive Robot Button & AI Assistant (تم دمجهما الآن في الزاوية السفلية اليمنى) -->
+    
+    <!-- AI Assistant -->
+    <div class="ai-assistant">
+        <!-- نافذة الدردشة تظهر فوق هذا الزر -->
+        <div class="assistant-window" id="assistantWindow">
+            <div class="assistant-messages" id="assistantMessages">
+                <div class="message bot">
+                    Hello! I'm your NASA exploration assistant. How can I help you today?
+                </div>
+            </div>
+            <div class="assistant-input">
+                <input type="text" id="assistantInput" placeholder="Ask about datasets, features, or exploration tips...">
+                <button class="btn primary" id="sendMessageBtn">Send</button>
+            </div>
+        </div>
+
+    <!-- 4. Interactive Robot Button & AI Assistant (تم دمجهما الآن في الزاوية السفلية اليمنى) -->
+    
+    <!-- AI Assistant -->
+    <div class="ai-assistant">
+        <!-- نافذة الدردشة تظهر فوق هذا الزر -->
+        <div class="assistant-window" id="assistantWindow">
+            <div class="assistant-messages" id="assistantMessages">
+                <div class="message bot">
+                    Hello! I'm your NASA exploration assistant. How can I help you today?
+                </div>
+            </div>
+            <div class="assistant-input">
+                <input type="text" id="assistantInput" placeholder="Ask about datasets, features, or exploration tips...">
+                <button class="btn primary" id="sendMessageBtn">Send</button>
+            </div>
+        </div>
+
+        <!-- زر التبديل (Toggle Button) -->
+        <button class="assistant-btn" id="assistantToggle" title="Open AI Assistant">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm4 0h-2V9h2v8z" fill="currentColor"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- الروبوت التفاعلي - يطير عندما يتم فتح نافذة المساعد -->
+    <div id="robot-bot" class="robot-button" title="اضغط لفتح المساعد!">
+        🤖
+    </div>
+
+    <script>
+        // دالة التهيئة الآمنة لحقل النجوم (Starfield)
+        function initStarfield() {
+            // ** يتم تعريف المتغيرات وإسنادها هنا لضمان عملها بعد تحميل العنصر **
+            const canvas = document.getElementById('starfield');
+            
+            if (!canvas) {
+                console.warn("Starfield canvas not found. Star animation cannot start.");
+                return;
+            }
+            
+            const ctx = canvas.getContext('2d');
+            let stars = [];
+            const numStars = 150;
+            let animationFrameId;
+
+            function setCanvasSize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+
+            function createStars() {
+                stars = []; 
+                for (let i = 0; i < numStars; i++) {
+                    stars.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        radius: Math.random() * 1.5 + 0.5,
+                        velocity: Math.random() * 0.05 + 0.05,
+                        alpha: Math.random()
+                    });
+                }
+            }
+
+            function drawStars() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = 0; i < numStars; i++) {
+                    const star = stars[i];
+
+                    star.y += star.velocity;
+
+                    if (star.y > canvas.height) {
+                        star.y = 0;
+                        star.x = Math.random() * canvas.width;
+                    }
+
+                    star.alpha += star.velocity * 5;
+                    if (star.alpha > Math.PI * 2) {
+                        star.alpha = 0;
+                    }
+                    const twinkle = Math.abs(Math.cos(star.alpha));
+
+                    ctx.fillStyle = `rgba(255, 255, 255, ${twinkle})`;
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2, false);
+                    ctx.fill();
+                }
+            }
+
+            function animate() {
+                drawStars();
+                animationFrameId = requestAnimationFrame(animate);
+            }
+
+            // التهيئة والتعامل مع تغيير الحجم
+            setCanvasSize();
+            createStars();
+            animate();
+
+            window.addEventListener('resize', () => {
+                cancelAnimationFrame(animationFrameId);
+                setCanvasSize();
+                createStars();
+                animate();
+            });
+        }
+        
+        // دالة تهيئة تفاعل الروبوت ومساعد الذكاء الاصطناعي
+        function initInteractions() {
+            const robot = document.getElementById('robot-bot');
+            const assistantToggleBtn = document.getElementById('assistantToggle');
+            const assistantWindow = document.getElementById('assistantWindow');
+            
+            if (!robot || !assistantToggleBtn || !assistantWindow) {
+                console.warn("Required interaction elements (robot, assistant buttons) not found.");
+                return;
+            }
+
+            // ربط ضغطة الروبوت بفتح المساعد الذكي
+            robot.addEventListener('click', () => {
+                // محاكاة ضغطة على زر التبديل
+                assistantToggleBtn.click();
+            });
+
+
+            // منطق تبديل عرض نافذة المساعد الذكي
+            assistantToggleBtn.addEventListener('click', () => {
+                const isOpening = !assistantWindow.classList.contains('open');
+                
+                assistantWindow.classList.toggle('open');
+
+                if (isOpening) {
+                    // حالة الفتح: الروبوت يطير بعيداً ويقف فوق النافذة
+                    
+                    // 1. إيقاف حركة الـ bounce فوراً
+                    robot.style.animation = 'none'; 
+                    // 2. تفعيل حركة الطيران والنار
+                    robot.classList.remove('returning'); // إزالة حالة العودة لو كانت موجودة
+                    robot.classList.add('flying');
+                    robot.style.pointerEvents = 'none'; // إيقاف التفاعل أثناء الطيران
+
+                } else {
+                    // حالة الإغلاق: الروبوت يعود للوضع الطبيعي في مكانه
+                    
+                    // 1. تفعيل حركة العودة
+                    robot.classList.remove('flying'); // إيقاف النار
+                    robot.classList.add('returning');
+                    robot.style.pointerEvents = 'none'; // إيقاف التفاعل أثناء العودة
+                    
+                    // 2. انتظار انتهاء حركة العودة (0.5 ثانية) ثم العودة لـ bounce
+                    robot.addEventListener('animationend', function handler(e) {
+                        if (e.animationName === 'flyAboveChat') {
+                            robot.classList.remove('returning');
+                            robot.style.animation = 'bounce 2s infinite';
+                            robot.style.pointerEvents = 'auto'; // إعادة تفعيل التفاعل
+                            robot.removeEventListener('animationend', handler);
+                        }
+                    });
+                }
+            });
+
+            // (ملاحظة: لا يوجد منطق فعلي لإرسال الرسائل في هذا الإصدار، تم إعداد الواجهة فقط)
+        }
+
+
+        // ** تشغيل كل دوال التهيئة عند تحميل النافذة بالكامل **
+        window.onload = function() {
+            initStarfield();
+            initInteractions(); // دمجت تهيئة الروبوت والمساعد هنا
+        };
+    </script>
+</body>
+</html>

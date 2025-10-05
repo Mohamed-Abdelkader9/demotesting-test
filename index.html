@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nasa Space Explorer</title>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at bottom, #090b20 0%, #01010a 100%);
+      color: #fff;
+      overflow-x: hidden;
+      opacity: 0;
+      animation: fadeInPage 1s ease forwards 1.5s;
+      position: relative;
+    }
+
+    @keyframes fadeInPage { to { opacity: 1; } }
+
+    #bgCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .loader {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 20% 20%, #000, #02021a);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .loader .planet {
+      width: 120px; height: 120px;
+      background: radial-gradient(circle at 30% 30%, #3f91ff, #003b80);
+      border-radius: 50%;
+      box-shadow: inset -20px 0 30px #00193d, 0 0 50px #007bff;
+      animation: rotate 2.5s linear infinite;
+    }
+
+    @keyframes rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .loader h2 {
+      margin-top: 25px;
+      color: #77b3ff;
+      letter-spacing: 2px;
+      font-size: 1.2rem;
+      animation: fadeText 1.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes fadeText {
+      0% { opacity: 0.3; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .loader.hide { animation: fadeOut 0.8s ease forwards; }
+    @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 80px;
+      position: relative;
+      backdrop-filter: blur(10px);
+      z-index: 5;
+    }
+
+    .header .logo {
+      font-size: 28px;
+      color: #6ecbff;
+      text-shadow: 0 0 10px #00aaff;
+    }
+
+    .header nav ul {
+      display: flex;
+      list-style: none;
+      gap: 40px;
+    }
+
+    .header nav ul li a {
+      color: #fff;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    .header nav ul li a:hover {
+      color: #00aaff;
+      text-shadow: 0 0 10px #00aaff;
+    }
+
+    .explore-btn {
+      position: relative;
+      background: transparent;
+      border: 2px solid #00aaff;
+      color: #00aaff;
+      padding: 10px 25px;
+      border-radius: 50px;
+      font-size: 16px;
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform 0.3s;
+    }
+
+    .explore-btn span { position: relative; z-index: 2; }
+
+    .explore-btn .circle {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 0; height: 0;
+      background: #00aaff;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: 0.4s;
+      z-index: 1;
+    }
+
+    .explore-btn:hover .circle { width: 200%; height: 500%; }
+    .explore-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px #00aaff; color: #000; }
+
+    .content {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 40px 80px 0 80px;
+      min-height: calc(100vh - 120px);
+      overflow: hidden;
+    }
+
+    .intro {
+      max-width: 600px;
+      padding: 30px;
+      background: linear-gradient(145deg, rgba(10, 15, 35, 0.8), rgba(0, 0, 0, 0.3));
+      border: 1px solid rgba(0, 170, 255, 0.3);
+      box-shadow: 0 0 40px rgba(0, 170, 255, 0.4);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      flex-shrink: 0;
+    }
+
+    .intro h1 {
+      font-size: 3em;
+      line-height: 1.3;
+      background: linear-gradient(90deg, #00e0ff, #ff00ff, #ffffff);
+      background-size: 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: galaxyFlow 6s infinite linear;
+      opacity: 0;
+      transform: translateY(40px);
+      animation: slideUp 1.5s ease forwards 1.5s;
+    }
+
+    @keyframes galaxyFlow { 0% { background-position: 0%; } 100% { background-position: 200%; } }
+
+    .intro p {
+      margin-top: 20px;
+      max-width: 480px;
+      color: #bcd3ff;
+      opacity: 0;
+      transform: translateY(50px);
+      animation: slideUp 1.2s ease forwards 2s;
+    }
+
+    @keyframes slideUp { to { transform: translateY(0); opacity: 1; } }
+
+    .mark { animation: colorShift 4s infinite; font-weight: bold; }
+
+    @keyframes colorShift {
+      0% { color: #ff00ff; }
+      25% { color: #00ffff; }
+      50% { color: #00ff99; }
+      75% { color: #ffcc00; }
+      100% { color: #ff00ff; }
+    }
+
+    .cursor { display: inline-block; width: 10px; background: #fff; animation: blink 0.7s infinite; vertical-align: bottom; }
+    @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+
+    .meteor {
+      position: absolute;
+      bottom: 0;
+      left: 8%;
+      width: 420px;
+      height: 180px;
+      background: url('https://pngfre.com/wp-content/uploads/meteor-png-image-from-pngfre-8.png') no-repeat center/contain;
+      z-index: 2;
+    }
+
+    .student {
+      position: absolute;
+      bottom: 120px;
+      left: 20%;
+      width: 200px;
+      height: 300px;
+      background: url('https://cdn.pixabay.com/photo/2021/06/18/07/10/boy-6344392_1280.png') no-repeat center/contain;
+      animation: studentMove 4s ease-in-out infinite alternate;
+      z-index: 3;
+    }
+
+    @keyframes studentMove { 0% { transform: translateY(0); } 100% { transform: translateY(-10px); } }
+
+    /* === Shining Meteors === */
+    .shooting-star {
+      position: fixed;
+      width: 3px;
+      height: 150px;
+      background: linear-gradient(180deg, rgba(0,255,255,0.9), transparent);
+      opacity: 0;
+      transform: rotate(-45deg);
+      filter: blur(1px);
+      z-index: 0;
+      animation: fall 2s linear forwards;
+    }
+
+    @keyframes fall {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) rotate(-45deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(800px, -800px) rotate(-45deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bgCanvas"></canvas>
+
+  <div class="loader">
+    <div class="planet"></div>
+    <h2>Exploring the Universe...</h2>
+  </div>
+
+  <header class="header">
+    <div class="logo">🚀 SpaceVision</div>
+    <nav>
+      <ul>
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Gallery</a></li>
+        <li><a href="#">Discover</a></li>
+        <li><a href="#">About</a></li>
+      </ul>
+    </nav>
+    <button class="explore-btn">
+      <span>Start Exploring</span>
+      <div class="circle"></div>
+    </button>
+  </header>
+
+  <main class="content">
+    <div class="intro">
+      <h1 id="typewriter"></h1><span class="cursor"></span>
+      <p>Discover real planetary data and images directly from NASA’s open databases and explore them interactively with our <span class="mark">Rocket!</span></p>
+    </div>
+    <div class="planet-container">
+      <canvas id="earthCanvas"></canvas>
+    </div>
+  </main>
+
+  <div class="meteor"></div>
+  <div class="student"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script>
+    // Typing Animation
+    const text = "Embark on a Journey Beyond the Stars";
+    const textElement = document.getElementById("typewriter");
+    let i = 0;
+    function typeEffect() {
+      if (i < text.length) {
+        textElement.innerHTML += text.charAt(i);
+        i++;
+        setTimeout(typeEffect, 60);
+      }
+    }
+    typeEffect();
+
+    // Background stars
+    const bgCanvas = document.getElementById('bgCanvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    function resizeCanvas() {
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    const stars = [];
+    for (let i = 0; i < 150; i++) {
+      stars.push({
+        x: Math.random() * bgCanvas.width,
+        y: Math.random() * bgCanvas.height,
+        size: Math.random() * 2 + 1,
+        speedX: (Math.random() - 0.5) * 0.5,
+        speedY: (Math.random() - 0.5) * 0.5,
+        color: Math.random() > 0.5 ? '#ffffff' : `hsl(${Math.random() * 60 + 30}, 100%, 70%)`
+      });
+    }
+
+    function drawStars() {
+      stars.forEach(star => {
+        star.x += star.speedX;
+        star.y += star.speedY;
+        if (star.x < 0) star.x = bgCanvas.width;
+        if (star.x > bgCanvas.width) star.x = 0;
+        if (star.y < 0) star.y = bgCanvas.height;
+        if (star.y > bgCanvas.height) star.y = 0;
+        bgCtx.beginPath();
+        bgCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        bgCtx.fillStyle = star.color;
+        bgCtx.fill();
+      });
+    }
+
+    function animateBackground() {
+      bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+      drawStars();
+      requestAnimationFrame(animateBackground);
+    }
+    animateBackground();
+
+    // Loader hide
+    window.addEventListener("load", () => {
+      setTimeout(() => {
+        document.querySelector(".loader").classList.add("hide");
+      }, 1500);
+    });
+
+    // Earth Globe
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("earthCanvas"), alpha: true });
+    renderer.setSize(800, 800);
+
+    const loader = new THREE.TextureLoader();
+    const earthTexture = loader.load("https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg");
+    const geometry = new THREE.SphereGeometry(2, 64, 64);
+    const material = new THREE.MeshStandardMaterial({ map: earthTexture });
+    const earth = new THREE.Mesh(geometry, material);
+    scene.add(earth);
+
+    const light = new THREE.PointLight(0xffffff, 1.5);
+    light.position.set(5, 3, 5);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight(0x404040));
+    camera.position.z = 5;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      earth.rotation.y += 0.002;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // === Shooting Stars Logic ===
+    function createShootingStar() {
+      const star = document.createElement("div");
+      star.classList.add("shooting-star");
+      document.body.appendChild(star);
+
+      const startX = Math.random() * (window.innerWidth / 3);
+      const startY = window.innerHeight - Math.random() * 100;
+      star.style.left = `${startX}px`;
+      star.style.top = `${startY}px`;
+
+      const duration = Math.random() * 2 + 1.5;
+      star.style.animationDuration = `${duration}s`;
+
+      setTimeout(() => star.remove(), duration * 1000);
+    }
+
+    setInterval(() => {
+      if (Math.random() < 0.7) createShootingStar();
+    }, 600);
+  </script>
+</body>
+</html>

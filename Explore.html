@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explore | Astro Tech</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at bottom, #090b20 0%, #01010a 100%);
+      color: #fff;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ===== Background Canvas ===== */
+    #bgCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* ===== Header ===== */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 25px 80px;
+      backdrop-filter: blur(10px);
+    }
+
+    .logo {
+      font-size: 28px;
+      color: #6ecbff;
+      text-shadow: 0 0 10px #00aaff, 0 0 30px #8b5cf6;
+      animation: glowPulse 2.5s ease-in-out infinite alternate;
+    }
+
+    .tagline {
+      font-size: 0.9rem;
+      color: #bcd3ff;
+      text-shadow: 0 0 10px rgba(0,170,255,0.6);
+      margin-top: 4px;
+      font-style: italic;
+      animation: fadeIn 2s ease-out 0.5s forwards;
+      opacity: 0;
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 40px;
+    }
+
+    nav ul li a {
+      color: #fff;
+      text-decoration: none;
+      position: relative;
+      transition: 0.3s;
+    }
+
+    nav ul li a::after {
+      content: "";
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: #00aaff;
+      transition: 0.3s ease;
+    }
+
+    nav ul li a:hover {
+      color: #00aaff;
+      text-shadow: 0 0 10px #00aaff;
+    }
+
+    nav ul li a:hover::after {
+      width: 100%;
+    }
+
+    /* ===== Section General Style ===== */
+    .explore-section {
+      max-width: 1100px;
+      margin: 100px auto;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(40px);
+      animation: fadeUp 1.3s ease forwards;
+    }
+
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .explore-section h2 {
+      font-size: 2.4rem;
+      margin-bottom: 30px;
+      background: linear-gradient(90deg, #00aaff, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow:
+        0 0 10px #00aaff,
+        0 0 20px #00aaff,
+        0 0 30px #8b5cf6,
+        0 0 40px #8b5cf6;
+      animation: glowPulse 2.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes glowPulse {
+      from {
+        text-shadow:
+          0 0 5px #00aaff,
+          0 0 10px #00aaff,
+          0 0 20px #8b5cf6,
+          0 0 25px #8b5cf6;
+      }
+      to {
+        text-shadow:
+          0 0 20px #00ffff,
+          0 0 40px #00ffff,
+          0 0 60px #8b5cf6,
+          0 0 80px #8b5cf6;
+      }
+    }
+
+    .image-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+
+    .image-card {
+      width: 450px;
+      height: 280px;
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      cursor: pointer;
+    }
+
+    .image-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s ease;
+    }
+
+    .image-card:hover img {
+      transform: scale(1.08);
+    }
+
+    .image-card:hover {
+      box-shadow: 0 0 30px #00aaff;
+      transform: scale(1.04);
+    }
+
+    .see-more {
+      display: inline-block;
+      margin-top: 40px;
+      background: transparent;
+      border: 2px solid #00aaff;
+      color: #00aaff;
+      padding: 15px 40px;
+      border-radius: 30px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .see-more span {
+      position: relative;
+      z-index: 2;
+    }
+
+    .see-more::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 0; height: 0;
+      background: #00aaff;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: 0.4s;
+      z-index: 1;
+    }
+
+    .see-more:hover::before {
+      width: 250%; height: 700%;
+    }
+
+    .see-more:hover {
+      color: #000;
+      box-shadow: 0 0 25px #00aaff;
+      transform: scale(1.08);
+    }
+    
+    footer {
+      text-align: center;
+      margin-top: 100px;
+      padding: 20px;
+      color: #888;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background animation -->
+  <canvas id="bgCanvas"></canvas>
+
+  <!-- Header -->
+  <header>
+    <div>
+      <div class="logo">🚀 Astro Tech</div>
+      <div class="tagline">Exploring Beyond the Stars — Mohamed Abdelkader</div>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="#">Gallery</a></li>
+        <li><a href="#">Discover</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- ===== Hubble Section ===== -->
+  <section class="explore-section">
+    <h2>💫 GALAXY Gallery</h2>
+    <div class="image-row">
+      <div class="image-card"><img src="demo_photo/galaxy1.jpeg" alt="galaxy Image 1"></div>
+      <div class="image-card"><img src="demo_photo/galaxy2.jpeg" alt="galaxy Image 2"></div>
+    </div>
+    <button class="see-more" onclick="window.location.href='hubble.html'"><span>See More</span></button>
+  </section>
+
+  <!-- ===== James Webb Section ===== -->
+  <section class="explore-section">
+    <h2>🪐 PLANET Gallery</h2>
+    <div class="image-row">
+      <div class="image-card"><img src="demo_photo/planet1.jpeg" alt="planet1 Image 1"></div>
+      <div class="image-card"><img src="demo_photo/planet2.jpeg" alt="planet2 Image 2"></div>
+    </div>
+    <button class="see-more" onclick="window.location.href='webb.html'"><span>See More</span></button>
+  </section>
+
+  <!-- ===== Moon Section ===== -->
+  <section class="explore-section">
+    <h2>🌕 Moon Captures</h2>
+    <div class="image-row">
+      <div class="image-card"><img src="demo_photo/moon1.jpg" alt="Moon Image 1"></div>
+      <div class="image-card"><img src="demo_photo/moon2.jpg" alt="Moon Image 2"></div>
+    </div>
+    <button class="see-more" onclick="window.location.href='moon.html'"><span>See More</span></button>
+  </section>
+
+  <section class="explore-section">
+    <h2>☄️ NEBULA Gallery</h2>
+    <div class="image-row">
+      <div class="image-card"><img src="demo_photo/nebula1.jpg" alt="Moon Image 1"></div>
+      <div class="image-card"><img src="demo_photo/nebula2.png" alt="Moon Image 2"></div>
+    </div>
+    <button class="see-more" onclick="window.location.href='moon.html'"><span>See More</span></button>
+  </section>
+
+  <section class="explore-section">
+    <h2>✨ STAR Gallery</h2>
+    <div class="image-row">
+      <div class="image-card"><img src="demo_photo/star1.jpeg" alt="Moon Image 1"></div>
+      <div class="image-card"><img src="demo_photo/star2.jpeg" alt="Moon Image 2"></div>
+    </div>
+    <button class="see-more" onclick="window.location.href='moon.html'"><span>See More</span></button>
+  </section>
+
+  <footer>© 2025 Astro Tech | Designed with 💫 Passion and Code</footer>
+
+  <script>
+    // Smooth, fast, twinkling star animation
+    const bgCanvas = document.getElementById('bgCanvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    let stars = [];
+
+    function resizeCanvas() {
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
+      stars = Array.from({ length: 250 }, () => ({
+        x: Math.random() * bgCanvas.width,
+        y: Math.random() * bgCanvas.height,
+        size: Math.random() * 1.5 + 0.5,
+        speedX: (Math.random() - 0.5) * 1.2,
+        speedY: (Math.random() - 0.5) * 1.2,
+        alpha: Math.random(),
+        delta: Math.random() * 0.02 + 0.005
+      }));
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function animateStars() {
+      bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+      stars.forEach(star => {
+        star.x += star.speedX;
+        star.y += star.speedY;
+        star.alpha += star.delta;
+        if (star.alpha <= 0 || star.alpha >= 1) star.delta *= -1;
+        if (star.x < 0) star.x = bgCanvas.width;
+        if (star.x > bgCanvas.width) star.x = 0;
+        if (star.y < 0) star.y = bgCanvas.height;
+        if (star.y > bgCanvas.height) star.y = 0;
+
+        bgCtx.beginPath();
+        bgCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        bgCtx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+        bgCtx.fill();
+      });
+      requestAnimationFrame(animateStars);
+    }
+    animateStars();
+  </script>
+</body>
+</html>
