@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rocket Launch Intro</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: radial-gradient(ellipse at bottom, #0b0e1a 0%, #030614 100%);
+    height: 100vh;
+    width: 100vw;
+    font-family: "Poppins", sans-serif;
+    color: white;
+  }
+
+  /* Rocket container */
+  .rocket-container {
+    position: absolute;
+    bottom: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 400px; /* big but responsive */
+    z-index: 10;
+    animation: launch 4s ease-in forwards;
+  }
+
+  .rocket-container img {
+    width: 100%;
+    display: block;
+  }
+
+  /* Flames */
+  .flames {
+    position: absolute;
+    bottom: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 15px;
+    z-index: -1;
+  }
+
+  .flame {
+    width: 20px;
+    height: 80px;
+    background: linear-gradient(to top, orange, yellow, white);
+    border-radius: 50%;
+    filter: blur(4px);
+    animation: flameFlicker 0.2s infinite;
+  }
+
+  .flame:nth-child(2) {
+    height: 100px;
+    animation-delay: 0.1s;
+  }
+  .flame:nth-child(3) {
+    height: 90px;
+    animation-delay: 0.15s;
+  }
+
+  @keyframes flameFlicker {
+    0%, 100% { transform: scaleY(1); opacity: 0.8; }
+    50% { transform: scaleY(1.3); opacity: 1; }
+  }
+
+  /* Launch motion */
+  @keyframes launch {
+    0% { bottom: -100%; }
+    30% { bottom: 20%; }
+    60% { bottom: 60%; }
+    100% { bottom: 120%; opacity: 0; }
+  }
+
+  /* Home content */
+  .home {
+    opacity: 0;
+    text-align: center;
+    padding-top: 20vh;
+    transition: opacity 1s ease;
+  }
+  .home.show {
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+  <!-- Rocket -->
+  <div class="rocket-container" id="rocket">
+    <img src="d1ad17ad-4e3f-4b9c-9b39-08d2184a7b06.png" alt="Rocket">
+    <div class="flames">
+      <div class="flame"></div>
+      <div class="flame"></div>
+      <div class="flame"></div>
+    </div>
+  </div>
+
+  <!-- Homepage -->
+  <div class="home" id="home">
+    <h1>Welcome to StellarSite</h1>
+    <p>Explore the universe with us.</p>
+  </div>
+
+<script>
+  // After rocket launch animation ends, show homepage
+  setTimeout(() => {
+    document.getElementById("rocket").style.display = "none";
+    document.getElementById("home").classList.add("show");
+    document.body.style.overflow = "auto"; // enable scrolling after launch
+  }, 4200);
+</script>
+</body>
+</html>

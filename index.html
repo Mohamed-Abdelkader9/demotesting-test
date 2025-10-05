@@ -32,7 +32,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: -1;
+      z-index: -2;
       pointer-events: none;
     }
 
@@ -197,10 +197,10 @@
     .meteor {
       position: absolute;
       bottom: 0;
-      left: 8%;
+      left: 80%;
       width: 420px;
       height: 180px;
-      background: url('https://pngfre.com/wp-content/uploads/meteor-png-image-from-pngfre-8.png') no-repeat center/contain;
+      background: url('https://raw.githubusercontent.com/abdoelhamd/assets/main/stone_base.png') no-repeat center/contain;
       z-index: 2;
     }
 
@@ -217,28 +217,81 @@
 
     @keyframes studentMove { 0% { transform: translateY(0); } 100% { transform: translateY(-10px); } }
 
-    /* === Shining Meteors === */
+    .light-beam {
+      position: absolute;
+      width: 6px;
+      height: 300px;
+      background: linear-gradient(to top right, rgba(255,255,200,0.8), rgba(255,255,255,0.1));
+      transform-origin: bottom left;
+      filter: blur(3px);
+      opacity: 0.9;
+      z-index: 4;
+      box-shadow: 0 0 20px rgba(255,255,200,0.6);
+      animation: beamGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes beamGlow {
+      0% { opacity: 0.6; box-shadow: 0 0 10px rgba(255,255,180,0.7); }
+      100% { opacity: 1; box-shadow: 0 0 30px rgba(255,255,255,1); }
+    }
+
+    /* === Vertical Shooting Meteors === */
     .shooting-star {
       position: fixed;
       width: 3px;
-      height: 150px;
-      background: linear-gradient(180deg, rgba(0,255,255,0.9), transparent);
+      height: 120px;
+      background: linear-gradient(180deg, rgba(0,255,255,1), transparent);
       opacity: 0;
-      transform: rotate(-45deg);
-      filter: blur(1px);
-      z-index: 0;
-      animation: fall 2s linear forwards;
+      filter: blur(2px);
+      z-index: -1;
+      animation: fallVertical 2s linear forwards;
     }
 
-    @keyframes fall {
-      0% {
-        opacity: 1;
-        transform: translate(0, 0) rotate(-45deg);
-      }
-      100% {
-        opacity: 0;
-        transform: translate(800px, -800px) rotate(-45deg);
-      }
+    @keyframes fallVertical {
+      0% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(900px); }
+    }
+
+    .planet-container {
+      position: relative;
+      top: -100px;
+      right: 0;
+      z-index: 5;
+    }
+
+    #earthCanvas{
+      position: relative;
+      z-index: 6;
+    }
+
+    .meteorite {
+      position: absolute;
+      bottom: -450px;
+      left: -15vw;
+      width: 75vw;
+      height: auto;
+      z-index: 5;
+    }
+
+    .meteorite img {
+      width: 100%;
+      height: auto;
+      display: block;
+      filter: brightness(1.1);
+    }
+
+    html, body {
+      height: 100%;
+      overflow-y: hidden;
+    }
+    .logo img{
+      width:55px;height:auto;
+      animation:pulseGlow 4s infinite ease-in-out,colorShift 10s infinite linear;
+      transition:transform 0.3s ease;
+    }
+    .logo{
+      display:flex;align-items:center;gap:12px;
+      font-size:28px;color:#6ecbff;text-shadow:0 0 10px #00aaff;
     }
   </style>
 </head>
@@ -251,7 +304,16 @@
   </div>
 
   <header class="header">
-    <div class="logo">🚀 SpaceVision</div>
+  <div class="logo">
+  <img src="WhatsApp_Image_2025-10-04_at_21.50.14_e804a3a1-removebg-preview.png" alt="SpaceVision Logo">
+  <span style="background: linear-gradient(90deg, #ff00ff, #00ffff, #00ff99, #ffcc00); 
+               -webkit-background-clip: text; 
+               -webkit-text-fill-color: transparent;
+               animation: galaxyFlow 6s infinite linear;">
+     SpaceVision
+  </span>
+  </div>
+
     <nav>
       <ul>
         <li><a href="#">Home</a></li>
@@ -278,6 +340,10 @@
 
   <div class="meteor"></div>
   <div class="student"></div>
+  <div class="meteorite">
+    <img src="6e8b273c8ca638c0f90b73cd0c911301 (1).png" alt="Meteorite" />
+  </div>
+  <div class="light-beam"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
   <script>
@@ -351,8 +417,8 @@
     const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("earthCanvas"), alpha: true });
     renderer.setSize(800, 800);
 
-    const loader = new THREE.TextureLoader();
-    const earthTexture = loader.load("https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg");
+    const loaderTex = new THREE.TextureLoader();
+    const earthTexture = loaderTex.load("https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg");
     const geometry = new THREE.SphereGeometry(2, 64, 64);
     const material = new THREE.MeshStandardMaterial({ map: earthTexture });
     const earth = new THREE.Mesh(geometry, material);
@@ -371,14 +437,14 @@
     }
     animate();
 
-    // === Shooting Stars Logic ===
+    // === Vertical Shooting Meteors Logic ===
     function createShootingStar() {
       const star = document.createElement("div");
       star.classList.add("shooting-star");
       document.body.appendChild(star);
 
-      const startX = Math.random() * (window.innerWidth / 3);
-      const startY = window.innerHeight - Math.random() * 100;
+      const startX = Math.random() * window.innerWidth;
+      const startY = -150;
       star.style.left = `${startX}px`;
       star.style.top = `${startY}px`;
 
@@ -389,8 +455,41 @@
     }
 
     setInterval(() => {
-      if (Math.random() < 0.7) createShootingStar();
-    }, 600);
+      const count = Math.floor(Math.random() * 3) + 1;
+      for (let i = 0; i < count; i++) {
+        createShootingStar();
+      }
+    }, 500);
+
+    // Auto-align beam to Earth
+    function updateBeamToEarth() {
+      const beam = document.querySelector('.light-beam');
+      const rock = document.querySelector('.meteorite img');
+      const earth = document.getElementById('earthCanvas');
+      if (!beam || !rock || !earth) return;
+
+      const rockRect = rock.getBoundingClientRect();
+      const earthRect = earth.getBoundingClientRect();
+
+      const rockX = rockRect.left + rockRect.width * 0.8;
+      const rockY = rockRect.top + rockRect.height * 0.15;
+
+      const earthX = earthRect.left + earthRect.width / 2;
+      const earthY = earthRect.top + earthRect.height / 2;
+
+      const dx = earthX - rockX;
+      const dy = earthY - rockY;
+      const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      beam.style.height = `${distance}px`;
+      beam.style.left = `${rockX}px`;
+      beam.style.top = `${rockY}px`;
+      beam.style.transform = `rotate(${angle - 90}deg)`;
+    }
+
+    window.addEventListener('resize', updateBeamToEarth);
+    window.addEventListener('load', () => setTimeout(updateBeamToEarth, 1000));
   </script>
 </body>
 </html>

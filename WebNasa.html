@@ -3,250 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Astro Tech: Interactive High-Resolution Image Platform</title>
-
-     <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Set up Inter font and dark theme -->
-     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden; /* Prevent horizontal scroll from animation */
-        }
-
-        /* --- New Keyframes for Rectangle Movement --- */
-        /* الصاروخ يتحرك الآن في مسار مستطيل (Rectangle) */
-        @keyframes rectangleMove {
-            /* 0% (Top Left) - Corner 1, pointing Right initially for a good start */
-            0% { transform: translate(10vw, 10vh) rotate(90deg); opacity: 1; }
-            /* 25% (Top Right) - Corner 2, rotate to point Down */
-            25% { transform: translate(90vw, 10vh) rotate(180deg); }
-            /* 50% (Bottom Right) - Corner 3, rotate to point Left */
-            50% { transform: translate(90vw, 90vh) rotate(270deg); }
-            /* 75% (Bottom Left) - Corner 4, rotate to point Up */
-            75% { transform: translate(10vw, 90vh) rotate(0deg); }
-            /* 100% (Back to Top Left) - Finish cycle, pointing Right */
-            100% { transform: translate(10vw, 10vh) rotate(90deg); }
-        }
-        /* ------------------------------------------- */
-
-        .rocket {
-            position: absolute;
-            top: 0;
-            left: 0;
-            font-size: 3rem;
-            /* Use the new rectangleMove animation */
-            animation: rectangleMove 30s linear infinite; /* Increased duration for smoother loop */
-            filter: drop-shadow(0 0 10px rgba(129, 230, 217, 0.7)); /* Cyan/Turquoise glow */
-            z-index: 50;
-        }
-        .astro-card {
-            backdrop-filter: blur(10px);
-            background-color: rgba(30, 41, 59, 0.7); /* Slate-800 with transparency */
-        }
-
-        
-
-        /* ----------------------------------------------------- */
-        /* --- 2. الأنماط العامة للعناصر --- */
-        /* ----------------------------------------------------- */
-
-        .main-title {
-            animation: pulseGlow 4s infinite ease-in-out;
-        }
-
-        .rocket {
-            position: absolute;
-            top: 0;
-            left: 0;
-            font-size: 3rem;
-            animation: rectangleMove 30s linear infinite; 
-            filter: drop-shadow(0 0 10px rgba(129, 230, 217, 0.7)); 
-            z-index: 50;
-        }
-
-        .satellite {
-            animation: rectangleMove 40s linear infinite, subtleTwinkle 3s infinite alternate;
-            animation-delay: 15s;
-            font-size: 2rem;
-            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
-        }
-
-        .astro-card {
-            backdrop-filter: blur(10px);
-            background-color: rgba(30, 41, 59, 0.7); /* Slate-800 with transparency */
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            transform-style: preserve-3d;
-        }
-        .astro-card:hover {
-            transform: rotateY(3deg) scale(1.02);
-            box-shadow: 0 10px 30px rgba(60, 150, 255, 0.4);
-        }
-
-
-        /* ----------------------------------------------------- */
-        /* --- 3. تصميم المساعد الذكي والروبوت (Robot Bot & AI Assistant) --- */
-        /* ----------------------------------------------------- */
-
-        /* حاوية المساعد الذكي - في الزاوية السفلية اليمنى */
-        .ai-assistant {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 90;
-        }
-
-        /* زر فتح المساعد */
-        .assistant-btn {
-            background-color: #3b82f6; /* Blue-500 */
-            color: white;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            transition: background-color 0.3s;
-        }
-        .assistant-btn:hover {
-            background-color: #2563eb; /* Blue-600 */
-        }
-
-        /* نافذة الدردشة */
-        .assistant-window {
-            position: absolute;
-            bottom: 70px; /* فوق الزر */
-            right: 0;
-            width: 300px;
-            height: 400px;
-            background-color: rgba(15, 23, 42, 0.98); /* Slate-900 transparent */
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            opacity: 0; /* يبدأ مخفياً */
-            visibility: hidden;
-            transform: scale(0.95); /* يبدأ أصغر قليلاً */
-            transition: all 0.3s ease-in-out;
-        }
-        .assistant-window.open {
-            opacity: 1;
-            visibility: visible;
-            transform: scale(1);
-        }
-        .assistant-messages {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .message {
-            max-width: 80%;
-            padding: 8px 12px;
-            border-radius: 15px;
-            font-size: 0.9rem;
-        }
-        .message.bot {
-            align-self: flex-start;
-            background-color: #334155; /* Slate-700 */
-        }
-        .assistant-input {
-            padding: 10px;
-            border-top: 1px solid #334155;
-            display: flex;
-        }
-        .assistant-input input {
-            flex-grow: 1;
-            padding: 8px;
-            background-color: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 6px;
-            margin-right: 8px;
-            color: white;
-            outline: none;
-        }
-        .assistant-input button {
-            background-color: #3b82f6;
-            padding: 8px 15px;
-            border-radius: 6px;
-            color: white;
-            transition: background-color 0.3s;
-        }
-
-
-        /* الروبوت التفاعلي */
-        .robot-button {
-            position: fixed;
-            bottom: 30px; /* نفس موضع زر المساعد */
-            right: 30px; 
-            cursor: pointer;
-            font-size: 3rem;
-            z-index: 110; /* ليكون فوق زر المساعد */
-            transition: transform 0.3s ease-out, opacity 0.3s ease;
-            animation: bounce 2s infinite; 
-            user-select: none; 
-            /* لتمكين استخدام العناصر الوهمية (pseudo-elements) */
-            line-height: 1; 
-            display: inline-block;
-        }
-        
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
-        }
-
-        /* الحركة الجديدة: الطيران فوق النافذة */
-        @keyframes flyAboveChat {
-            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-            50% { transform: translateY(-100px) rotate(15deg) scale(1.1); } 
-            100% { transform: translateY(-430px) rotate(0deg) scale(1); opacity: 1; } 
-        }
-
-        /* الرسوم المتحركة الجديدة للهب */
-        @keyframes jetFlame {
-            0% { height: 10px; opacity: 1; background-color: #ff9900; } /* برتقالي */
-            50% { height: 25px; opacity: 0.8; background-color: #ff3300; } /* أحمر */
-            100% { height: 10px; opacity: 1; background-color: #ff9900; }
-        }
-
-        .robot-button.flying {
-            animation: flyAboveChat 0.8s ease-out forwards;
-            pointer-events: none;
-        }
-        
-        /* الروبوت في حالة العودة، عكس الحركة */
-        .robot-button.returning {
-            animation: flyAboveChat 0.5s ease-in reverse forwards; 
-        }
-
-        /* إضافة تأثير اللهب عند الطيران فقط */
-        .robot-button.flying::before {
-            content: '';
-            position: absolute;
-            bottom: -15px; /* يوضع أسفل الروبوت */
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 10px;
-            background-color: #ff9900; 
-            border-radius: 50% 50% 10% 10%; /* شكل اللهب */
-            box-shadow: 0 0 10px 5px rgba(255, 153, 0, 0.7); /* توهج */
-            z-index: -1; /* خلف الروبوت */
-            animation: jetFlame 0.15s infinite alternate; /* حركة وميض سريعة */
-        }
-        
-        /* إخفاء النار (::before) عند عدم الطيران */
-        .robot-button:not(.flying)::before {
-            content: none;
-        }
-    </style>
+    <title>NASA Space Explorer: Interactive High-Resolution Image Platform</title>
     <style>
         :root {
             --bg: #040714;
@@ -982,14 +739,6 @@
     </style>
 </head>
 <body>
-
-    <!-- 1. Starfield Canvas Background -->
-    <canvas id="starfield" class="fixed inset-0 w-full h-full -z-10"></canvas>
-
-    <!-- 2. Animated Rocket Element (Using an emoji for a quick, theme-appropriate icon) -->
-    <div class="rocket hidden md:block" style="animation-delay: 5s;">🚀</div>
-    <div class="rocket hidden md:block" style="animation-duration: 15s; animation-delay: 1s; font-size: 2rem;">🛰️</div>
-
     <!-- Enhanced Space Background -->
     <div class="space-background">
         <div class="stars-layer-1"></div>
@@ -1008,7 +757,7 @@
                 </svg>
             </div>
             <div>
-                <h1>Astro Tech</h1>
+                <h1>NASA Space Explorer</h1>
                 <p class="small">Interactive High-Resolution Image Platform</p>
             </div>
         </div>
@@ -1035,10 +784,7 @@
                     <button class="filter-btn" data-filter="timelapse">Timelapse</button>
                 </div>
             </div>
-
-
             <div class="dataset-list" id="datasetList">
-              
                 <!-- Datasets will be populated by JavaScript -->
             </div>
         </aside>
@@ -1106,58 +852,88 @@
     </div>
 
     <script>
-        
-        
         // NASA datasets with metadata
         const datasets = [
             {
-                id: 'heic0506a.jpeg',
+                id: 'hubble-andromeda',
                 title: 'Hubble: Andromeda Galaxy',
                 description: '2.5-gigapixel image of the Andromeda Galaxy - the largest Hubble image ever taken',
                 source: 'Hubble Space Telescope',
                 resolution: '2.5 Gigapixels',
                 tags: ['space', 'galaxy', 'hubble'],
                 category: 'space',
-                thumb: 'heic0506a.jpeg',
-                imageUrl: 'heic0506a.jpeg', // Example URL pattern
+                thumb: 'https://www.nasa.gov/sites/default/files/thumbnails/image/hs-2015-02-a-hires_jpg.jpg',
+                tileUrl: 'https://example.com/tiles/andromeda/{z}/{x}/{y}.jpg', // Example URL pattern
                 center: [0.5, 0.5],
                 maxZoom: 8
             },
-
+            {
+                id: 'mars-global',
+                title: 'Mars Global Survey',
+                description: 'Daily global map of Mars in multiple spectral bands from the Mars Reconnaissance Orbiter',
+                source: 'Mars Reconnaissance Orbiter',
+                resolution: '1 Gigapixel/day',
+                tags: ['mars', 'global', 'mro'],
+                category: 'mars',
+                thumb: 'https://mars.nasa.gov/system/resources/detail_files/25002_PIA23804-web.jpg',
+                tileUrl: 'https://example.com/tiles/mars/{z}/{x}/{y}.jpg',
+                center: [0.5, 0.5],
+                maxZoom: 7
+            },
+            {
+                id: 'moon-poles',
+                title: 'Lunar Polar Maps',
+                description: 'High-resolution maps of the Moon\'s polar regions from the Lunar Reconnaissance Orbiter',
+                source: 'Lunar Reconnaissance Orbiter',
+                resolution: '100 Megapixels',
+                tags: ['moon', 'polar', 'lroc'],
+                category: 'moon',
+                thumb: 'https://photojournal.jpl.nasa.gov/jpeg/PIA18836.jpg',
+                tileUrl: 'https://example.com/tiles/moon/{z}/{x}/{y}.jpg',
+                center: [0.5, 0.5],
+                maxZoom: 6
+            },
+            {
+                id: 'earth-blue-marble',
+                title: 'Earth: Blue Marble',
+                description: 'Classic view of Earth from space - a global composite of satellite imagery',
+                source: 'NASA Earth Observatory',
+                resolution: '64 Megapixels',
+                tags: ['earth', 'global', 'composite'],
+                category: 'earth',
+                thumb: 'https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73788/land_ocean_ice_2048.jpg',
+                tileUrl: 'https://example.com/tiles/earth/{z}/{x}/{y}.jpg',
+                center: [0.5, 0.5],
+                maxZoom: 5
+            },
+            {
+                id: 'california-fires',
+                title: 'California Wildfires Timelapse',
+                description: 'Sequence of satellite images showing wildfire progression and smoke plumes',
+                source: 'NASA Worldview',
+                resolution: 'Timelapse (30 frames)',
+                tags: ['earth', 'timelapse', 'wildfire'],
+                category: 'timelapse',
+                thumb: 'https://www.nasa.gov/sites/default/files/thumbnails/image/iss065e086359.jpg',
+                tileUrl: 'https://example.com/tiles/fires/{z}/{x}/{y}.jpg',
+                center: [0.5, 0.5],
+                maxZoom: 6,
+                timelapse: true
+            },
+            {
+                id: 'jupiter-storms',
+                title: 'Jupiter\'s Storms',
+                description: 'Detailed view of Jupiter\'s atmosphere and storm systems from Juno spacecraft',
+                source: 'Juno Mission',
+                resolution: '150 Megapixels',
+                tags: ['jupiter', 'storms', 'juno'],
+                category: 'space',
+                thumb: 'https://www.nasa.gov/sites/default/files/thumbnails/image/pia21974.jpg',
+                tileUrl: 'https://example.com/tiles/jupiter/{z}/{x}/{y}.jpg',
+                center: [0.5, 0.5],
+                maxZoom: 7
+            }
         ];
-
-function loadDataset(dataset) {
-    const tileLayer = document.getElementById('tileLayer');
-    const emptyState = document.getElementById('emptyState');
-    const loader = document.getElementById('loader');
-
-    // امسح القديم
-    tileLayer.innerHTML = '';
-    emptyState.style.display = 'none';
-
-    // شغل اللودر لو عايز
-    loader.style.display = 'block';
-
-    if (dataset.imageUrl) {
-        const img = document.createElement('img');
-        img.src = dataset.imageUrl;
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'contain';
-
-        // لما الصورة تخلص تحميل
-        img.onload = () => {
-            loader.style.display = 'none';
-        };
-
-        tileLayer.appendChild(img);
-    } else if (dataset.tileUrl) {
-        // لو dataset من نوع tiles (الكواكب القديمة)
-        renderTiles();
-        loader.style.display = 'none';
-    }
-}
-
 
         // Application state
         let currentDataset = null;
@@ -1244,16 +1020,18 @@ function loadDataset(dataset) {
             currentPosition = { x: 0, y: 0 };
             updateViewerTransform();
             
-setTimeout(() => {
-    loader.style.display = 'none';
-    // renderTiles();  // اتلغت
-    // loadMarkers();  // دي كمان مسؤولة عن النقاط (Galaxy Core .. إلخ) لو مش عايزها
-}, 1500);
-
+            // Simulate loading tiles (in a real app, this would fetch actual tile data)
+            setTimeout(() => {
+                loader.style.display = 'none';
+                renderTiles();
+                loadMarkers();
+            }, 1500);
         }
 
-
-            {
+        // Render image tiles based on current view
+        function renderTiles() {
+            tileLayer.innerHTML = '';
+            
             // In a real implementation, this would calculate which tiles to load
             // based on the current zoom level and position
             const tileSize = 256;
@@ -1545,271 +1323,6 @@ setTimeout(() => {
 
         // Initialize the application when the DOM is loaded
         document.addEventListener('DOMContentLoaded', init);
-    </script>
-
-    <script>
-        // JavaScript for the Starfield Animation
-        const canvas = document.getElementById('starfield');
-        const ctx = canvas.getContext('2d');
-        let stars = [];
-        const numStars = 150;
-        let animationFrameId;
-
-        function setCanvasSize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-
-        function createStars() {
-            for (let i = 0; i < numStars; i++) {
-                stars.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    radius: Math.random() * 1.5 + 0.5, // 0.5 to 2.0
-                    velocity: Math.random() * 0.05 + 0.05, // 0.05 to 0.1
-                    alpha: Math.random() // for twinkling effect
-                });
-            }
-        }
-
-        function drawStars() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < numStars; i++) {
-                const star = stars[i];
-
-                // Update position (subtle downward drift for slow 'travel')
-                star.y += star.velocity;
-
-                // Loop stars from bottom to top
-                if (star.y > canvas.height) {
-                    star.y = 0;
-                    star.x = Math.random() * canvas.width;
-                }
-
-                // Update alpha for twinkling
-                star.alpha += star.velocity * 5;
-                if (star.alpha > Math.PI * 2) {
-                    star.alpha = 0;
-                }
-                const twinkle = Math.abs(Math.cos(star.alpha));
-
-                // Draw star
-                ctx.fillStyle = `rgba(255, 255, 255, ${twinkle})`;
-                ctx.beginPath();
-                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2, false);
-                ctx.fill();
-            }
-        }
-
-        function animate() {
-            drawStars();
-            animationFrameId = requestAnimationFrame(animate);
-        }
-
-        // Initialize and handle resize
-        setCanvasSize();
-        createStars();
-        animate();
-
-        window.addEventListener('resize', () => {
-            // Stop current animation to avoid glitches during resize
-            cancelAnimationFrame(animationFrameId);
-            setCanvasSize();
-            // Re-initialize stars for new dimensions (optional, keeps them spread out)
-            stars = [];
-            createStars();
-            // Restart animation
-            animate();
-        });
-    </script>
-
- <!-- 4. Interactive Robot Button & AI Assistant (تم دمجهما الآن في الزاوية السفلية اليمنى) -->
-    
-    <!-- AI Assistant -->
-    <div class="ai-assistant">
-        <!-- نافذة الدردشة تظهر فوق هذا الزر -->
-        <div class="assistant-window" id="assistantWindow">
-            <div class="assistant-messages" id="assistantMessages">
-                <div class="message bot">
-                    Hello! I'm your NASA exploration assistant. How can I help you today?
-                </div>
-            </div>
-            <div class="assistant-input">
-                <input type="text" id="assistantInput" placeholder="Ask about datasets, features, or exploration tips...">
-                <button class="btn primary" id="sendMessageBtn">Send</button>
-            </div>
-        </div>
-
-    <!-- 4. Interactive Robot Button & AI Assistant (تم دمجهما الآن في الزاوية السفلية اليمنى) -->
-    
-    <!-- AI Assistant -->
-    <div class="ai-assistant">
-        <!-- نافذة الدردشة تظهر فوق هذا الزر -->
-        <div class="assistant-window" id="assistantWindow">
-            <div class="assistant-messages" id="assistantMessages">
-                <div class="message bot">
-                    Hello! I'm your NASA exploration assistant. How can I help you today?
-                </div>
-            </div>
-            <div class="assistant-input">
-                <input type="text" id="assistantInput" placeholder="Ask about datasets, features, or exploration tips...">
-                <button class="btn primary" id="sendMessageBtn">Send</button>
-            </div>
-        </div>
-
-        <!-- زر التبديل (Toggle Button) -->
-        <button class="assistant-btn" id="assistantToggle" title="Open AI Assistant">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm4 0h-2V9h2v8z" fill="currentColor"/>
-            </svg>
-        </button>
-    </div>
-
-    <!-- الروبوت التفاعلي - يطير عندما يتم فتح نافذة المساعد -->
-    <div id="robot-bot" class="robot-button" title="اضغط لفتح المساعد!">
-        🤖
-    </div>
-
-    <script>
-        // دالة التهيئة الآمنة لحقل النجوم (Starfield)
-        function initStarfield() {
-            // ** يتم تعريف المتغيرات وإسنادها هنا لضمان عملها بعد تحميل العنصر **
-            const canvas = document.getElementById('starfield');
-            
-            if (!canvas) {
-                console.warn("Starfield canvas not found. Star animation cannot start.");
-                return;
-            }
-            
-            const ctx = canvas.getContext('2d');
-            let stars = [];
-            const numStars = 150;
-            let animationFrameId;
-
-            function setCanvasSize() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            }
-
-            function createStars() {
-                stars = []; 
-                for (let i = 0; i < numStars; i++) {
-                    stars.push({
-                        x: Math.random() * canvas.width,
-                        y: Math.random() * canvas.height,
-                        radius: Math.random() * 1.5 + 0.5,
-                        velocity: Math.random() * 0.05 + 0.05,
-                        alpha: Math.random()
-                    });
-                }
-            }
-
-            function drawStars() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                for (let i = 0; i < numStars; i++) {
-                    const star = stars[i];
-
-                    star.y += star.velocity;
-
-                    if (star.y > canvas.height) {
-                        star.y = 0;
-                        star.x = Math.random() * canvas.width;
-                    }
-
-                    star.alpha += star.velocity * 5;
-                    if (star.alpha > Math.PI * 2) {
-                        star.alpha = 0;
-                    }
-                    const twinkle = Math.abs(Math.cos(star.alpha));
-
-                    ctx.fillStyle = `rgba(255, 255, 255, ${twinkle})`;
-                    ctx.beginPath();
-                    ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2, false);
-                    ctx.fill();
-                }
-            }
-
-            function animate() {
-                drawStars();
-                animationFrameId = requestAnimationFrame(animate);
-            }
-
-            // التهيئة والتعامل مع تغيير الحجم
-            setCanvasSize();
-            createStars();
-            animate();
-
-            window.addEventListener('resize', () => {
-                cancelAnimationFrame(animationFrameId);
-                setCanvasSize();
-                createStars();
-                animate();
-            });
-        }
-        
-        // دالة تهيئة تفاعل الروبوت ومساعد الذكاء الاصطناعي
-        function initInteractions() {
-            const robot = document.getElementById('robot-bot');
-            const assistantToggleBtn = document.getElementById('assistantToggle');
-            const assistantWindow = document.getElementById('assistantWindow');
-            
-            if (!robot || !assistantToggleBtn || !assistantWindow) {
-                console.warn("Required interaction elements (robot, assistant buttons) not found.");
-                return;
-            }
-
-            // ربط ضغطة الروبوت بفتح المساعد الذكي
-            robot.addEventListener('click', () => {
-                // محاكاة ضغطة على زر التبديل
-                assistantToggleBtn.click();
-            });
-
-
-            // منطق تبديل عرض نافذة المساعد الذكي
-            assistantToggleBtn.addEventListener('click', () => {
-                const isOpening = !assistantWindow.classList.contains('open');
-                
-                assistantWindow.classList.toggle('open');
-
-                if (isOpening) {
-                    // حالة الفتح: الروبوت يطير بعيداً ويقف فوق النافذة
-                    
-                    // 1. إيقاف حركة الـ bounce فوراً
-                    robot.style.animation = 'none'; 
-                    // 2. تفعيل حركة الطيران والنار
-                    robot.classList.remove('returning'); // إزالة حالة العودة لو كانت موجودة
-                    robot.classList.add('flying');
-                    robot.style.pointerEvents = 'none'; // إيقاف التفاعل أثناء الطيران
-
-                } else {
-                    // حالة الإغلاق: الروبوت يعود للوضع الطبيعي في مكانه
-                    
-                    // 1. تفعيل حركة العودة
-                    robot.classList.remove('flying'); // إيقاف النار
-                    robot.classList.add('returning');
-                    robot.style.pointerEvents = 'none'; // إيقاف التفاعل أثناء العودة
-                    
-                    // 2. انتظار انتهاء حركة العودة (0.5 ثانية) ثم العودة لـ bounce
-                    robot.addEventListener('animationend', function handler(e) {
-                        if (e.animationName === 'flyAboveChat') {
-                            robot.classList.remove('returning');
-                            robot.style.animation = 'bounce 2s infinite';
-                            robot.style.pointerEvents = 'auto'; // إعادة تفعيل التفاعل
-                            robot.removeEventListener('animationend', handler);
-                        }
-                    });
-                }
-            });
-
-            // (ملاحظة: لا يوجد منطق فعلي لإرسال الرسائل في هذا الإصدار، تم إعداد الواجهة فقط)
-        }
-
-
-        // ** تشغيل كل دوال التهيئة عند تحميل النافذة بالكامل **
-        window.onload = function() {
-            initStarfield();
-            initInteractions(); // دمجت تهيئة الروبوت والمساعد هنا
-        };
     </script>
 </body>
 </html>
